@@ -8,11 +8,16 @@ export default class ProductManager {
 
   async getProducts() {
     try {
-      const products = await fs.promises.readFile(this.path, "utf-8");
-      const productsJson = await JSON.parse(products);
-      return productsJson;
+      if (fs.existsSync(this.path)) {
+        const data = await fs.promises.readFile(this.path, "utf-8");
+        const products = JSON.parse(data);
+        return products;
+      } else {
+        return [];
+      }
     } catch (error) {
-      console.error(error.message);
+      console.log(error);
+      return [];
     }
   }
 
@@ -57,7 +62,7 @@ export default class ProductManager {
 
   async getProductById(id) {
     try {
-      const products = await fs.promises.readFile(this.path, "utf-8");
+      const products = await this.getProducts();
       const productsJson = await JSON.parse(products);
       let product = productsJson.find((p) => p.id === id);
       if (product) return product;
@@ -69,7 +74,7 @@ export default class ProductManager {
 
   async updateProduct(id, newProduct) {
     try {
-      const products = await fs.promises.readFile(this.path, "utf-8");
+      const products = await this.getProducts();
       const productsJson = await JSON.parse(products);
       const productIndex = productsJson.findIndex((p) => p.id === id);
       if (productIndex === -1) {
@@ -89,7 +94,7 @@ export default class ProductManager {
 
   async deleteProducts(id) {
     try {
-      const products = await fs.promises.readFile(this.path, "utf-8");
+      const products = await this.getProducts();
       const productsJson = await JSON.parse(products);
       const productIndex = productsJson.findIndex((p) => p.id === id);
       if (productIndex === -1) {
