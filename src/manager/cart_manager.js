@@ -1,4 +1,5 @@
 import fs from "fs";
+const path = "../files/carts.json";
 
 export default class CartManager {
   constructor(path) {
@@ -32,11 +33,8 @@ export default class CartManager {
       } else {
         cart.id = carts[carts.length - 1].id + 1;
       }
-      this.carts.push(cart);
-      return await fs.promises.writeFile(
-        this.path,
-        JSON.stringify(this.carts, null, "\t")
-      );
+      carts.push(cart);
+      await fs.promises.writeFile(this.path, JSON.stringify(carts, null, "\t"));
     } catch (error) {
       console.error(error.message);
     }
@@ -45,8 +43,7 @@ export default class CartManager {
   async getCartById(id) {
     try {
       const carts = await this.getCarts();
-      const cartsJson = await JSON.parse(carts);
-      let cart = cartsJson.find((c) => c.id === id);
+      let cart = carts.find((c) => c.id === id);
       if (cart) return cart;
       console.log("Cart not found.");
     } catch (error) {
@@ -61,40 +58,42 @@ export default class CartManager {
         qty: qty,
       };
       const carts = await this.getCarts();
-      const cartsJson = await JSON.parse(carts);
-      const cartIndex = cartsJson.findIndex((c) => c.id === cid);
-      if (cartIndex === -1) {
-        console.log("Cart not found");
+      const cart = carts.find((elm) => elm.id === cid);
+      const cartProducts = cart.products;
+      if (!cart) {
+        console.log("No se encontro el carrito a actualizar.");
+        return;
+      }
+      if (cartProducts.length === 0) {
+        cartProducts.push(newProduct);
       } else {
-        cartsJson[cartIndex].id = cid;
-        if (cartsJson[cartIndex].products.find(pid)) {
-        }
-
-        cartsJson[cartIndex].products.push(newProduct);
+        cartProducts.forEach((p) => {
+          if (pid === p.product) {
+            p.qty++;
+          }
+        });
       }
       return await fs.promises.writeFile(
         this.path,
-        JSON.stringify(productsJson, null, "\t")
+        JSON.stringify(carts, null, "\t")
       );
     } catch (error) {
       console.error(error.message);
     }
   }
 
-  async deleteProducts(id) {
+  async deleteCart(id) {
     try {
-      const products = await fs.promises.readFile(this.path, "utf-8");
-      const productsJson = await JSON.parse(products);
-      const productIndex = productsJson.findIndex((p) => p.id === id);
-      if (productIndex === -1) {
-        console.log("Product not found");
+      const carts = await this.getCarts();
+      const cartIndex = carts.findIndex((c) => c.id === id);
+      console.log(id);
+      if (cartIndex === -1) {
+        console.log("Cart not found");
+        return;
       } else {
-        productsJson.splice(productIndex, 1);
+        carts.splice(cartIndex, 1);
       }
-      await fs.promises.writeFile(
-        this.path,
-        JSON.stringify(productsJson, null, "\t")
-      );
+      await fs.promises.writeFile(this.path, JSON.stringify(carts, null, "\t"));
     } catch (error) {
       console.error(error.message);
     }

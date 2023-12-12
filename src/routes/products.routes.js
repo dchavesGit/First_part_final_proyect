@@ -1,7 +1,8 @@
 import { Router } from "express";
-import { uploader } from "../uploader.js";
 import ProductManager from "../manager/product_manager.js";
+
 const router = Router();
+
 const productManager = new ProductManager("./src/files/products.json");
 
 router.get("/", async (req, res) => {
@@ -14,7 +15,7 @@ router.get("/", async (req, res) => {
         products.splice(limit - products.length);
       }
     }
-    res.send(products);
+    res.send({ status: "success", payload: products });
   } catch (error) {
     res.status(500).send({ error: error.message });
   }
@@ -26,7 +27,9 @@ router.get("/:pid", async (req, res) => {
     const pid = parseInt(req.params.pid);
     const productSelected = products.find((p) => p.id === pid);
     if (!productSelected) {
-      res.status(400).send("Product not found");
+      res
+        .status(400)
+        .send({ status: "not success", data: "Product not found" });
     } else {
       res.send(productSelected);
     }
