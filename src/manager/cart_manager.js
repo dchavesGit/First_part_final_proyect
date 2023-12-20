@@ -61,22 +61,19 @@ export default class CartManager {
       const cart = carts.find((elm) => elm.id === cid);
       const cartProducts = cart.products;
       if (!cart) {
-        console.log("No se encontro el carrito a actualizar.");
+        console.log("Not found cart to update");
         return;
       }
       if (cartProducts.length === 0) {
         cartProducts.push(newProduct);
       } else {
         cartProducts.forEach((p) => {
-          if (pid === p.product) {
-            p.qty++;
+          if (pid === p.id) {
+            p.qty = p.qty + newProduct.qty;
           }
         });
       }
-      return await fs.promises.writeFile(
-        this.path,
-        JSON.stringify(carts, null, "\t")
-      );
+      await fs.promises.writeFile(this.path, JSON.stringify(carts, null, "\t"));
     } catch (error) {
       console.error(error.message);
     }
