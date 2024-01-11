@@ -24,6 +24,7 @@ export default class ProductManager {
 
   async addProduct(product) {
     try {
+      const products = await this.getProducts();
       const {
         title,
         description,
@@ -37,7 +38,7 @@ export default class ProductManager {
       if (!title || !description || !price || !code || !stock || !status) {
         console.log("All the fields need to be completed");
         productValid = false;
-      } else if (this.products.find((p) => p.code === code)) {
+      } else if (products.find((p) => p.code === code)) {
         console.log(
           `The code ${code} was alrady in use, please ckeck the field code again.`
         );
@@ -45,16 +46,16 @@ export default class ProductManager {
       }
 
       if (productValid) {
-        if (this.products.length === 0) {
+        if (products.length === 0) {
           product.id = 1;
         } else {
-          product.id = this.products[this.products.length - 1].id + 1;
+          product.id = products[products.length - 1].id + 1;
         }
-        this.products.push(product);
+        products.push(product);
       }
       await fs.promises.writeFile(
         this.path,
-        JSON.stringify(this.products, null, "\t")
+        JSON.stringify(products, null, "\t")
       );
     } catch (error) {
       console.error(error.message);
